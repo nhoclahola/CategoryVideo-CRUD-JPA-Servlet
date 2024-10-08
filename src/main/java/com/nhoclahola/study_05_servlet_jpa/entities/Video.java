@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Entity
 @Table(name = "videos")
@@ -12,6 +13,7 @@ import java.io.Serializable;
 @Builder
 @Getter
 @Setter
+@NamedQuery(name = "Video.findAll", query = "SELECT v FROM Video v")
 public class Video implements Serializable
 {
     private static final long serialVersionUID = 1L;
@@ -33,4 +35,10 @@ public class Video implements Serializable
     @ManyToOne
     @JoinColumn(name="CategoryId")
     private Category category;
+
+    @PrePersist
+    public void prePersist()
+    {
+        this.videoId = "video-" + UUID.randomUUID().toString().replace("-", "");;
+    }
 }
