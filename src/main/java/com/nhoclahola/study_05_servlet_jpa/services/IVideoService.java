@@ -1,10 +1,10 @@
-package com.nhoclahola.study_05_servlet_jpa.dao;
+package com.nhoclahola.study_05_servlet_jpa.services;
 
 import com.nhoclahola.study_05_servlet_jpa.entities.Video;
 
 import java.util.List;
 
-public interface IVideoDao
+public interface IVideoService
 {
     void insert(Video video);
 

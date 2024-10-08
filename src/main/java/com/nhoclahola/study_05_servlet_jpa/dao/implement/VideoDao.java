@@ -93,11 +93,21 @@ public class VideoDao implements IVideoDao
     }
 
     @Override
-    public Video findById(int videoId)
+    public Video findById(String videoId)
     {
         EntityManager enma = JPAConfig.getEntityManager();
         Video video = enma.find(Video.class, videoId);
         return video;
+    }
+
+    @Override
+    public List<Video> findByTitle(String title)
+    {
+        EntityManager enma = JPAConfig.getEntityManager();
+        String jpql = "SELECT v FROM Video v WHERE v.title like :title";
+        TypedQuery<Video> query = enma.createQuery(jpql, Video.class);
+        query.setParameter("title", "%" + title + "%");
+        return query.getResultList();
     }
 
     @Override
