@@ -1,8 +1,11 @@
 package com.nhoclahola.study_05_servlet_jpa.controllers.admin;
 
 import com.nhoclahola.study_05_servlet_jpa.entities.Category;
+import com.nhoclahola.study_05_servlet_jpa.entities.Video;
 import com.nhoclahola.study_05_servlet_jpa.services.ICategoryService;
+import com.nhoclahola.study_05_servlet_jpa.services.IVideoService;
 import com.nhoclahola.study_05_servlet_jpa.services.implement.CategoryServiceImpl;
+import com.nhoclahola.study_05_servlet_jpa.services.implement.VideoServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,12 +20,13 @@ import java.nio.file.Paths;
 import java.util.List;
 
 @MultipartConfig()
-@WebServlet(urlPatterns = {"/admin/categories",
-        "/admin/category/add",
-        "/admin/category/edit",
-        "/admin/category/insert", "/admin/category/delete", "/admin/category"})
-public class CategoryController extends HttpServlet
+@WebServlet(urlPatterns = {"/admin/videos",
+        "/admin/video/add",
+        "/admin/video/edit",
+        "/admin/video/insert", "/admin/video/delete"})
+public class VideoController extends HttpServlet
 {
+    private final IVideoService videoService = new VideoServiceImpl();
     private final ICategoryService categoryService = new CategoryServiceImpl();
 
     @Override
@@ -31,53 +35,45 @@ public class CategoryController extends HttpServlet
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
         String url = req.getRequestURI();
-        if (url.contains("/admin/category/add"))
+        if (url.contains("/admin/videos"))
         {
-            req.getRequestDispatcher("/views/admin/category-add.jsp").forward(req, resp);
+            List<Video> videos = videoService.findAll();
+            req.setAttribute("videoList", videos);
+            req.getRequestDispatcher("/views/admin/video-list.jsp").forward(req, resp);
         }
-        else if (url.contains("/admin/categories"))
+        else if (url.contains("/admin/video/add"))
         {
-            List<Category> categories = categoryService.findAll();
-            req.setAttribute("categoryList", categories);
-            req.getRequestDispatcher("/views/admin/category-list.jsp").forward(req, resp);
+            if (req.getParameter("categoryId") != null)
+            {
+                int id = Integer.parseInt(req.getParameter("categoryId"));
+                req.setAttribute("categoryId", id);
+            }
+            req.getRequestDispatcher("/views/admin/video-add.jsp").forward(req, resp);
         }
-        else if (url.contains("/admin/category/delete"))
+        else if (url.contains("/admin/video/edit"))
         {
-            int id = Integer.parseInt(req.getParameter("id"));
+            String videoId = req.getParameter("id");
+            Video video = videoService.findById(videoId);
+            if (video == null)
+            {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Video not found");
+                return;
+            }
+            req.setAttribute("video", video);
+            req.getRequestDispatcher("/views/admin/video-edit.jsp").forward(req, resp);
+        }
+        else if (url.contains("/admin/video/delete"))
+        {
+            String videoId = req.getParameter("id");
             try
             {
-                categoryService.delete(id);
+                videoService.delete(videoId);
             }
             catch (Exception e)
             {
                 throw new RuntimeException(e);
             }
-//            req.getRequestDispatcher("/views/admin/category-list.jsp").forward(req, resp);
-            resp.sendRedirect(req.getContextPath() + "/admin/categories");
-        }
-        else if (url.contains("/admin/category/edit"))
-        {
-            int id = Integer.parseInt(req.getParameter("id"));
-            Category category = categoryService.findById(id);
-            if (category == null)
-            {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Category not found");
-                return;
-            }
-            req.setAttribute("category", category);
-            req.getRequestDispatcher("/views/admin/category-edit.jsp").forward(req, resp);
-        }
-        else if (url.contains("/admin/category"))
-        {
-            int id = Integer.parseInt(req.getParameter("id"));
-            Category category = categoryService.findById(id);
-            if (category == null)
-            {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Category not found");
-                return;
-            }
-            req.setAttribute("category", category);
-            req.getRequestDispatcher("/views/admin/category-info.jsp").forward(req, resp);
+            resp.sendRedirect(req.getContextPath() + "/admin/videos");
         }
     }
 
@@ -87,78 +83,19 @@ public class CategoryController extends HttpServlet
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
         String url = req.getRequestURI();
-        if (url.contains("/admin/category/insert"))
-        {
-            // Get data from view
-            String categoryName = req.getParameter("categoryName");
-            System.out.println(req.getParameter("status"));
-            int status = Integer.parseInt(req.getParameter("status"));
-            String imageLink = req.getParameter("imageLink");
-
-            Category categoryModel = Category.builder()
-                    .categoryName(categoryName)
-                    .status(status)
-                    .build();
-
-            // Handle upload file
-            String fname = "";
-            String uploadPath = req.getServletContext().getRealPath("/uploads");
-            File uploadDir = new File(uploadPath);
-            if (!uploadDir.exists())
-                uploadDir.mkdir();
-            try
-            {
-                Part part = req.getPart("image");
-                if (part.getSize() > 0)
-                {
-                    String fileName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
-                    int index = fileName.lastIndexOf(".");
-                    String ext = fileName.substring(index + 1);
-                    fname = System.currentTimeMillis() + "." + ext;
-                    // upload
-                    part.write(uploadPath + "/" + fname);
-                    categoryModel.setImage(fname);
-                }
-                else if (!imageLink.isBlank())
-                {
-                    categoryModel.setImage(imageLink);
-                }
-                else
-                {
-                    categoryModel.setImage("avatar.png");
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            // Service
-            categoryService.insert(categoryModel);
-            //
-            resp.sendRedirect(req.getContextPath() + "/admin/categories");
-        }
-        else if (url.contains("/admin/category/edit"))
+        if (url.contains("/admin/video/insert"))
         {
             // Get data from view
             int categoryId = Integer.parseInt(req.getParameter("categoryId"));
-            Category oldCategory = categoryService.findById(categoryId);
-            if (oldCategory == null)
-            {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Category not found");
-                return;
-            }
-            String categoryName = req.getParameter("categoryName");
-            int status = Integer.parseInt(req.getParameter("status"));
+            Category category = categoryService.findById(categoryId);
+            String description = req.getParameter("description");
+            int active = Integer.parseInt(req.getParameter("active"));
             String imageLink = req.getParameter("imageLink");
-
-            Category categoryModel = Category.builder()
-                    .categoryId(categoryId)
-                    .categoryName(categoryName)
-                    .status(status)
-                    .videos(oldCategory.getVideos())
+            Video video = Video.builder()
+                    .category(category)
+                    .description(description)
+                    .active(active)
                     .build();
-
             // Handle upload file
             String fname = "";
             String uploadPath = req.getServletContext().getRealPath("/uploads");
@@ -176,28 +113,84 @@ public class CategoryController extends HttpServlet
                     fname = System.currentTimeMillis() + "." + ext;
                     // upload
                     part.write(uploadPath + "/" + fname);
-                    categoryModel.setImage(fname);
+                    video.setPoster(fname);
                 }
                 else if (!imageLink.isBlank())
                 {
-                    categoryModel.setImage(imageLink);
+                    video.setPoster(imageLink);
                 }
                 else
                 {
-                    // Keep the same image as old category
-                    categoryModel.setImage(oldCategory.getImage());
+                    video.setPoster("avatar.png");
                 }
             }
             catch (Exception e)
             {
                 e.printStackTrace();
             }
-
-
             // Service
-            categoryService.update(categoryModel);
+            videoService.insert(video);
             //
-            resp.sendRedirect(req.getContextPath() + "/admin/categories");
+            resp.sendRedirect(req.getContextPath() + "/admin/category?id=" + categoryId);
+        }
+        else if (url.contains("/admin/video/edit"))
+        {
+            // Get data from view
+            String videoId = req.getParameter("videoId");
+            Video oldVideo = videoService.findById(videoId);
+            if (oldVideo == null)
+            {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Video not found");
+                return;
+            }
+            int categoryId = Integer.parseInt(req.getParameter("categoryId"));
+            Category category = categoryService.findById(categoryId);
+            String description = req.getParameter("description");
+            int active = Integer.parseInt(req.getParameter("active"));
+            String imageLink = req.getParameter("imageLink");
+            Video video = Video.builder()
+                    .videoId(videoId)
+                    .category(category)
+                    .description(description)
+                    .active(active)
+                    .build();
+            // Handle upload file
+            String fname = "";
+            String uploadPath = req.getServletContext().getRealPath("/uploads");
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists())
+                uploadDir.mkdir();
+            try
+            {
+                Part part = req.getPart("image");
+                if (part.getSize() > 0)
+                {
+                    String fileName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
+                    int index = fileName.lastIndexOf(".");
+                    String ext = fileName.substring(index + 1);
+                    fname = System.currentTimeMillis() + "." + ext;
+                    // upload
+                    part.write(uploadPath + "/" + fname);
+                    video.setPoster(fname);
+                }
+                else if (!imageLink.isBlank())
+                {
+                    video.setPoster(imageLink);
+                }
+                else
+                {
+                    // Keep the same poster
+                    video.setPoster(oldVideo.getPoster());
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            // Service
+            videoService.update(video);
+            //
+            resp.sendRedirect(req.getContextPath() + "/admin/category?id=" + categoryId);
         }
     }
 }
