@@ -34,8 +34,9 @@ public class Category implements Serializable
     @Column(name="Status")
     private int status;
 
-    //bi-directional many-to-one association to Video
-    @OneToMany(mappedBy = "category")
+    // bi-directional many-to-one association to Video
+    // When remove a category which already has video, it will also remove video in database
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Video> videos;
 
     public Video addVideo(Video video)
