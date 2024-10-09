@@ -13,23 +13,25 @@
     <title>Update Category</title>
 </head>
 <body>
+<a href="<c:url value="/admin/categories"/>">Back to Category list</a>
 <form role="form" action="${pageContext.request.contextPath}/admin/category/edit" method="post" enctype="multipart/form-data">
     <input type="text" name="categoryId" hidden="hidden" value="${category.categoryId}">
     <div class="form-group">
         <label>Category name: </label>
         <input class="form-control"
-               placeholder="Please enter category name" name="categoryName" value="${category.categoryName}"/>
+               placeholder="Please enter category name" name="categoryName" value="${category.categoryName}" required/>
     </div>
     <div class="form-group">
         <label>Status: </label>
         <br/>
-        <input type="radio" id="active" name="status" value="1" ${category.status == 1 ? 'checked="checked"' : ''} />
+        <input type="radio" id="active" name="status" value="1" ${category.status == 1 ? 'checked="checked"' : ''} required/>
         <label for="active">Active</label><br>
         <input type="radio" id="lock" name="status" value="0" ${category.status == 0 ? 'checked="checked"' : ''} />
         <label for="lock">Locked</label>
     </div>
     <div class="form-group">
         <label>Image</label>
+        <c:set var="imgUrl" value="${category.image}"/>
         <c:if test="${category.image.length() >= 5 && !category.image.substring(0, 5).equals('https')}">
             <c:url value="/image?filename=${category.image}" var="imgUrl"></c:url>
         </c:if>

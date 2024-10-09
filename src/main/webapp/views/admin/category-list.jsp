@@ -13,6 +13,8 @@
 </head>
 
 <body>
+<a href="${pageContext.request.contextPath}">Back to Home</a>
+<br/>
 <a href="${pageContext.request.contextPath}/admin/category/add">Add more category</a>
 <table border="1">
     <tr>
@@ -24,7 +26,7 @@
     </tr>
     <c:forEach items="${categoryList}" var="cate" varStatus="STT">
         <tr class="odd gradeX">
-            <td width="50" style="text-align: center;">${STT.index+1 }</td>
+            <td width="50" style="text-align: center;"><a href="<c:url value="/admin/category?id=${cate.categoryId}"/>">${cate.categoryId}</a></td>
             <c:set var="imgUrl" value="${cate.image}"/>
             <c:if test="${cate.image.length() >= 5 && !cate.image.substring(0, 5).equals('https')}">
                 <c:url value="/image?filename=${cate.image}" var="imgUrl"></c:url>
@@ -43,8 +45,8 @@
                 </c:choose>
             </td>
             <td style="text-align: center;" width="200">
-                <a href="<c:url value='/admin/category/edit?id=${cate.categoryId }'/>" class="center">Edit</a>
-                <a href="<c:url value='/admin/category/delete?id=${cate.categoryId }'/>" class="center">Delete</a>
+                <a style="color: blue" href="<c:url value='/admin/category/edit?id=${cate.categoryId }'/>" class="center">Edit</a>
+                <a style="color: red" href="<c:url value='/admin/category/delete?id=${cate.categoryId }'/>" class="center">Delete</a>
             </td>
         </tr>
     </c:forEach>
