@@ -1,6 +1,7 @@
 package com.nhoclahola.study_05_servlet_jpa.configurations;
 
 import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -13,6 +14,13 @@ import java.util.Enumeration;
 @WebListener
 public class AppContextListener implements ServletContextListener
 {
+    // Start Hibernate at the beginning
+    @Override
+    public void contextInitialized(ServletContextEvent sce)
+    {
+        EntityManager enma = JPAConfig.getEntityManager();
+    }
+
     //Clean up Hikari and MySQL connection
     @Override
     public void contextDestroyed(ServletContextEvent sce)
