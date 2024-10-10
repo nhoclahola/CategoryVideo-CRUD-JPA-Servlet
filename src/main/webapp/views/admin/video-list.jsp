@@ -20,7 +20,7 @@
     <tr>
         <th style="text-align: center;">ID</th>
         <th style="text-align: center;">Category ID</th>
-        <th style="text-align: center;">Image</th>
+        <th style="text-align: center;">Poster</th>
         <th style="text-align: center;">Description</th>
         <th style="text-align: center;">Active</th>
         <th style="text-align: center;">Action</th>

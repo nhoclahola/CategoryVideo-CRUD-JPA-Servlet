@@ -21,7 +21,6 @@
         <div class="form-group">
             <label>Category ID:</label>
             <input class="form-control"
-                   readonly
                    required
                    value="${categoryId}"
                    placeholder="Please enter Category ID" name="categoryId"/>
