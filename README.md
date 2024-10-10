@@ -50,6 +50,7 @@ CREATE DATABASE category_video_management;
 ```
 
 ### Step 3: Build and deploy the project
+Alternatively, you can open as a project in IDE (such as Intellij, Eclipse, Spring Tool Suite, etc.) and build dependencies there, then start at Tomcat Server. Or you can follow the steps below:
 1. Package the project using Maven:
 ```bash
 mvn clean package
